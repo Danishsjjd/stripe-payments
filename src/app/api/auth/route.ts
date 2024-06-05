@@ -34,10 +34,3 @@ export async function POST() {
   cookies().set(options);
   return NextResponse.json({}, { status: 200 });
 }
-
-export async function GET() {
-  const user = await isLogin();
-  if (!user) return NextResponse.json(false, { status: 401 });
-
-  return NextResponse.json({ isLogged: true }, { status: 200 });
-}

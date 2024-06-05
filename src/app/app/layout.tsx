@@ -1,10 +1,12 @@
+import { redirect } from "next/navigation";
 import { type ReactNode } from "react";
+import { isLogin } from "~/server/api/trpc";
 import AppProvider from "../../context/app";
-import { api } from "~/trpc/server";
 import Header from "./header";
 
 const layout = async ({ children }: { children: ReactNode }) => {
-  const user = await api.auth.user();
+  const user = await isLogin();
+  if (!user) return redirect("/auth");
 
   return (
     <AppProvider user={user}>
