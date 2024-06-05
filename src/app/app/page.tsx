@@ -1,14 +1,10 @@
-import { api } from "~/trpc/server";
-import LogoutButton from "../_components/logout";
+"use client";
+import { useAppContext } from "~/context/app";
 
-const page = async () => {
-  const user = await api.auth.user();
-  return (
-    <div className="grid h-svh w-svw place-items-center content-center gap-4">
-      <LogoutButton />
-      <p>{user.email}</p>
-    </div>
-  );
+const HomePage = () => {
+  const { user } = useAppContext();
+
+  return <p>Hello 👋, {user.name || user.email}</p>;
 };
 
-export default page;
+export default HomePage;

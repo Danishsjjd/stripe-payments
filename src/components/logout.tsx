@@ -9,6 +9,7 @@ const LogoutButton = () => {
   const router = useRouter();
 
   async function signOutUser() {
+    if (!confirm("Sign out?")) return;
     //Sign out with the Firebase client
     await signOut(auth);
 
@@ -22,7 +23,11 @@ const LogoutButton = () => {
     }
   }
 
-  return <Button onClick={signOutUser}>sign out</Button>;
+  return (
+    <Button onClick={signOutUser} variant={"destructive"}>
+      Sign out
+    </Button>
+  );
 };
 
 export default LogoutButton;
