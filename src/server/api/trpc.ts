@@ -6,7 +6,9 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
+import { auth } from "firebase-admin";
+import { cookies } from "next/headers";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -78,3 +80,22 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure;
+
+export const isLogin = async () => {
+  const session = cookies().get("session")?.value;
+  if (!session) return false;
+
+  const decodedClaims = await auth().verifySessionCookie(session, true);
+  if (!decodedClaims) return false;
+
+  return decodedClaims;
+};
+
+export const protectedProcedure = t.procedure.use(
+  t.middleware(async ({ next }) => {
+    const user = await isLogin();
+    if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+    return next({ ctx: { user } });
+  }),
+);

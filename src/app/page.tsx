@@ -1,19 +1,7 @@
-"use client";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { Button } from "~/components/ui/button";
-import { auth } from "~/data/firebase";
+import { redirect } from "next/navigation";
 
-export default function Home() {
-  const handleGoogleAuth = () => {
-    const provider = new GoogleAuthProvider();
+const HomePage = async () => {
+  redirect("/app");
+};
 
-    void signInWithPopup(auth, provider);
-  };
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <Button variant={"ringHover"} onClick={handleGoogleAuth}>
-        Sign with google
-      </Button>
-    </main>
-  );
-}
+export default HomePage;
