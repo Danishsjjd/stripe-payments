@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
+import { classes } from "~/data/classes";
 import { api } from "~/trpc/react";
 
 const product = {
@@ -71,59 +72,60 @@ const CheckoutPage = () => {
   }, [router, successParam, sessionIdParam]);
 
   return (
-    <div className="mx-auto max-w-64 text-center">
+    <>
       <ShowToast success={response.success} />
-      <h2 className="text-4xl font-medium text-gray-900">Stripe Checkout</h2>
-      <p className="pt-2 text-sm text-gray-500">
+      <h2 className={classes.pageTitle}>Stripe Checkout</h2>
+      <p className={classes.pageDescription}>
         Change the quantity of the products below, then click checkout to open
         the Stripe Checkout window.
       </p>
 
-      <div className="pt-10">
-        <div className="grid grid-cols-2">
-          <h3 className="text-left font-medium">Product name:</h3>
-          <p className="text-right">{product.name}</p>
-        </div>
-        <div className="grid grid-cols-2 pb-4">
-          <h3 className="text-left font-medium">Stripe Amount:</h3>
-          <p className="text-right">${product.amount / 100}</p>
-        </div>
+      <div className={classes.gridContainer}>
+        <h3 className={classes.gridLeftItem}>Product name:</h3>
+        <pre>{product.name}</pre>
 
-        <Image
-          unoptimized
-          src={product.images[0]}
-          width={256}
-          height={256}
-          alt="product"
-        />
-
-        <div className="flex items-center py-4">
-          <Button
-            disabled={checkout.isPending}
-            variant={"gooeyLeft"}
-            onClick={() => setQuantity((pre) => Math.max(0, --pre))}
-            size={"lg"}
-            className="bg-secondary text-gray-900"
-          >
-            -
-          </Button>
-          <span className="grow text-3xl font-medium">{quantity}</span>
-          <Button
-            disabled={checkout.isPending}
-            variant={"gooeyRight"}
-            onClick={() => setQuantity((pre) => ++pre)}
-            size={"lg"}
-            className="bg-secondary text-gray-900"
-          >
-            +
-          </Button>
-        </div>
+        <h3 className={classes.gridLeftItem}>Stripe Amount:</h3>
+        <pre>${product.amount / 100}</pre>
       </div>
 
-      <Button onClick={onCheckout} disabled={checkout.isPending || !quantity}>
+      <Image
+        unoptimized
+        src={product.images[0]}
+        width={672}
+        height={672}
+        alt="product"
+      />
+
+      <div className="mx-auto flex max-w-60 items-center py-4">
+        <Button
+          disabled={checkout.isPending}
+          variant={"gooeyLeft"}
+          onClick={() => setQuantity((pre) => Math.max(0, --pre))}
+          size={"lg"}
+          className="bg-secondary text-gray-900"
+        >
+          -
+        </Button>
+        <span className="grow text-3xl font-medium">{quantity}</span>
+        <Button
+          disabled={checkout.isPending}
+          variant={"gooeyRight"}
+          onClick={() => setQuantity((pre) => ++pre)}
+          size={"lg"}
+          className="bg-secondary text-gray-900"
+        >
+          +
+        </Button>
+      </div>
+
+      <Button
+        onClick={onCheckout}
+        disabled={checkout.isPending || !quantity}
+        className="w-60"
+      >
         Start Checkout
       </Button>
-    </div>
+    </>
   );
 };
 

@@ -74,3 +74,51 @@
     @apply bg-background text-foreground;
   }
 }
+
+/*
+CSS to style Stripe credit card fields on PMPro checkout page
+Add this CSS to your theme's stylesheet.
+*/
+
+/* Base Stripe element styling*/
+.StripeElement {
+  background-color: #f8f8f8;
+  padding: 10px;
+  border: 2px solid #e0dddd;
+}
+
+/* Set a red bottom border to field when empty */
+.StripeElement--empty {
+  border-bottom-color: #b22222;
+}
+
+/* Set a green bottom border to field when in focus */
+.StripeElement--focus {
+  border-bottom-color: #008000;
+}
+
+/* Set styling when form field data is invalid */
+.StripeElement--invalid {
+  background-color: #ffd90080;
+  border-color: #b22222;
+}
+
+/* Set styling when form field data is completed and valid */
+.StripeElement--complete {
+  background-color: #00800015;
+}
+
+/* Set credit card number input field width */
+form.pmpro_form #pmpro_payment_information_fields div#AccountNumber {
+  max-width: 270px;
+}
+
+/* Set expiry date input field width */
+form.pmpro_form #pmpro_payment_information_fields div#Expiry {
+  max-width: 110px;
+}
+
+/* Set CVC/CVV input field width */
+form.pmpro_form #pmpro_payment_information_fields div#CVV {
+  max-width: 110px;
+}

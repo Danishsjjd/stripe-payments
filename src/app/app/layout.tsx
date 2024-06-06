@@ -11,7 +11,7 @@ const layout = async ({ children }: { children: ReactNode }) => {
   return (
     <AppProvider user={user}>
       <Header />
-      <main className="p-5">{children}</main>
+      <main className="mx-auto max-w-2xl p-8 text-center">{children}</main>
     </AppProvider>
   );
 };
