@@ -85,6 +85,7 @@ Add this CSS to your theme's stylesheet.
   background-color: #f8f8f8;
   padding: 10px;
   border: 2px solid #e0dddd;
+  flex-grow: 1;
 }
 
 /* Set a red bottom border to field when empty */

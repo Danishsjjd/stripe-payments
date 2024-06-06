@@ -48,25 +48,28 @@ const PaymentPage = () => {
     if (!paymentIntentResponse || !cardElement) return;
 
     setLoading(true);
-    const cardPayment = await stripe?.confirmCardPayment(
-      paymentIntentResponse.client_secret!,
-      {
-        payment_method: {
-          card: cardElement,
+    try {
+      const cardPayment = await stripe?.confirmCardPayment(
+        paymentIntentResponse.client_secret!,
+        {
+          payment_method: {
+            card: cardElement,
+          },
         },
-      },
-    );
-    setLoading(false);
-    if (!cardPayment || cardPayment.error) {
-      console.error("error:", cardPayment?.error);
+      );
+      if (!cardPayment || cardPayment.error) {
+        console.error("error:", cardPayment?.error);
 
-      cardPayment?.error.payment_intent &&
-        setPaymentIntentResponse(
-          cardPayment.error.payment_intent as PaymentIntent,
-        );
-    } else {
-      console.info("success:", cardPayment.paymentIntent);
-      setPaymentIntentResponse(cardPayment.paymentIntent as PaymentIntent);
+        cardPayment?.error.payment_intent &&
+          setPaymentIntentResponse(
+            cardPayment.error.payment_intent as PaymentIntent,
+          );
+      } else {
+        console.info("success:", cardPayment.paymentIntent);
+        setPaymentIntentResponse(cardPayment.paymentIntent as PaymentIntent);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -127,13 +130,14 @@ const PaymentPage = () => {
             <code>4000002500003155</code>
           </div>
 
-          <CardElement />
-          <Button
-            className="mt-4"
-            disabled={loading || paymentIntent.status === "success"}
-          >
-            Pay
-          </Button>
+          <div className="flex items-center gap-4">
+            <CardElement />
+            <Button
+              disabled={loading || paymentIntentResponse.status === "succeeded"}
+            >
+              Pay
+            </Button>
+          </div>
         </form>
       )}
     </>
