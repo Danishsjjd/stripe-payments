@@ -8,6 +8,8 @@ await import("./src/env.js");
 const config = {
   images: { remotePatterns: [{ hostname: "lh3.googleusercontent.com" }] },
   logging: { fetches: { fullUrl: true } },
+  reactStrictMode: true,
+  output: "standalone",
 };
 
 export default config;

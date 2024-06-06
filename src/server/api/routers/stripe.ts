@@ -6,8 +6,6 @@ import { paymentForm } from "~/app/app/payment/paymentFormSchema";
 import { initFirebaseAdminApp } from "~/lib/firebase-admin-config";
 import { getFirestore } from "firebase-admin/firestore";
 
-const WEBAPP_URL = "http://localhost:3000";
-
 initFirebaseAdminApp();
 
 async function upsertCustomer(
@@ -145,7 +143,7 @@ async function listSubscriptions(userId: string) {
 
 export const stripeRouter = createTRPCRouter({
   checkout: protectedProcedure
-    .input(z.object({ line_items: z.any() }))
+    .input(z.object({ line_items: z.any(), WEBAPP_URL: z.string() }))
     .mutation(({ input }) => {
       const { line_items } = input as {
         line_items: Stripe.Checkout.SessionCreateParams.LineItem[];
@@ -155,8 +153,8 @@ export const stripeRouter = createTRPCRouter({
         payment_method_types: ["card"],
         line_items,
         mode: "payment",
-        success_url: `${WEBAPP_URL}/app/checkout?session_id={CHECKOUT_SESSION_ID}&success=true`,
-        cancel_url: `${WEBAPP_URL}/app/checkout?session_id={CHECKOUT_SESSION_ID}&success=false`,
+        success_url: `${input.WEBAPP_URL}/app/checkout?session_id={CHECKOUT_SESSION_ID}&success=true`,
+        cancel_url: `${input.WEBAPP_URL}/app/checkout?session_id={CHECKOUT_SESSION_ID}&success=false`,
       });
     }),
   payments: protectedProcedure

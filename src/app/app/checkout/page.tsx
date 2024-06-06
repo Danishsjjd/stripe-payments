@@ -48,6 +48,7 @@ const CheckoutPage = () => {
             },
           },
         ],
+        WEBAPP_URL: window.location.origin,
       },
       {
         onSuccess({ id: sessionId }) {
