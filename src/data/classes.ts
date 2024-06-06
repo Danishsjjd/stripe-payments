@@ -5,6 +5,6 @@ export const classes = {
   description: "pb-5 pt-2 text-gray-500",
   container: "mx-auto my-3 w-full rounded-md border border-gray-200 p-5",
   gridContainer:
-    "grid grid-cols-[125px_1fr] gap-5 overflow-x-auto py-5 text-left",
+    "grid grid-cols-[150px_1fr] gap-3 overflow-x-auto py-5 text-left",
   gridLeftItem: "sticky left-0 bg-white pr-1 select-none",
 };

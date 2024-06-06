@@ -9,7 +9,7 @@ export const env = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]),
     STRIPE_SECRET: z.string(),
-    STRIPE_WEBHOOK_SECRETS: z.string().optional(),
+    STRIPE_WEBHOOK_SECRETS: z.string(),
     GOOGLE_APPLICATION_CREDENTIALS: z.string(),
   },
 
