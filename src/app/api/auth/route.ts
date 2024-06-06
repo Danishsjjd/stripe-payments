@@ -2,6 +2,7 @@ import { auth } from "firebase-admin";
 import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { initFirebaseAdminApp } from "~/lib/firebase-admin-config";
+import { getFirestore } from "firebase-admin/firestore";
 
 // Init the Firebase SDK every time the server is called
 initFirebaseAdminApp();
@@ -31,5 +32,13 @@ export async function POST() {
 
   //Add the cookie to the browser
   cookies().set(options);
+
+  const firestore = getFirestore();
+
+  await firestore
+    .collection("users")
+    .doc(decodedToken.uid)
+    .set({ email: decodedToken.email }, { merge: true });
+
   return NextResponse.json({}, { status: 200 });
 }
