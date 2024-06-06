@@ -5,7 +5,6 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { paymentForm } from "~/app/app/payment/paymentFormSchema";
 import { initFirebaseAdminApp } from "~/lib/firebase-admin-config";
 import { getFirestore } from "firebase-admin/firestore";
-import { firestore } from "firebase-admin";
 
 const WEBAPP_URL = "http://localhost:3000";
 
@@ -85,23 +84,22 @@ async function createSubscription(
     expand: ["latest_invoice.payment_intent"],
   });
 
-  const invoice = subscription.latest_invoice as Stripe.Invoice;
-  const payment_intent = invoice.payment_intent as Stripe.PaymentIntent;
-
-  // Update the user's status
-  if (payment_intent.status === "succeeded") {
-    const userSnapshot = getFirestore();
-    await userSnapshot
-      .collection("users")
-      .doc(userId)
-      .set(
-        {
-          stripeCustomerId: customer.id,
-          activePlans: firestore.FieldValue.arrayUnion(subscription.id),
-        },
-        { merge: true },
-      );
-  }
+  // ! (can be handled by webhook) Update the user's status
+  // const invoice = subscription.latest_invoice as Stripe.Invoice;
+  // const payment_intent = invoice.payment_intent as Stripe.PaymentIntent;
+  // if (payment_intent.status === "succeeded") {
+  //   const userSnapshot = getFirestore();
+  //   await userSnapshot
+  //     .collection("users")
+  //     .doc(userId)
+  //     .set(
+  //       {
+  //         stripeCustomerId: customer.id,
+  //         activePlans: firestore.FieldValue.arrayUnion(subscription.id),
+  //       },
+  //       { merge: true },
+  //     );
+  // }
 
   return subscription;
 }
@@ -117,19 +115,18 @@ async function cancelSubscription(userId: string, subscriptionId: string) {
 
   const subscription = await stripe.subscriptions.cancel(subscriptionId);
 
-  // Cancel at end of period
+  // ! (can be handled by webhook) Cancel at end of period
   // const subscription = stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
+  // if (subscription.status === "canceled") {
+  //   const userSnapshot = getFirestore();
 
-  if (subscription.status === "canceled") {
-    const userSnapshot = getFirestore();
-
-    await userSnapshot
-      .collection("users")
-      .doc(userId)
-      .update({
-        activePlans: firestore.FieldValue.arrayRemove(subscription.id),
-      });
-  }
+  //   await userSnapshot
+  //     .collection("users")
+  //     .doc(userId)
+  //     .update({
+  //       activePlans: firestore.FieldValue.arrayRemove(subscription.id),
+  //     });
+  // }
 
   return subscription;
 }

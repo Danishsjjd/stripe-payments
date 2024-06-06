@@ -11,15 +11,6 @@ initFirebaseAdminApp();
 const webhookHandler: Partial<
   Record<Stripe.Event.Type, (event: never) => Promise<unknown>>
 > = {
-  "checkout.session.completed": async (_: Stripe.Event.Data) => {
-    // Add your business logic here
-  },
-  "payment_intent.succeeded": async (_: Stripe.PaymentIntent) => {
-    // Add your business logic here
-  },
-  "payment_intent.payment_failed": async (_: Stripe.PaymentIntent) => {
-    // Add your business logic here
-  },
   "customer.subscription.deleted": async (data: Stripe.Subscription) => {
     const customer = (await stripe.customers.retrieve(
       data.customer as string,
@@ -44,20 +35,6 @@ const webhookHandler: Partial<
     await userRef.update({
       activePlans: firestore.FieldValue.arrayUnion(data.id),
     });
-  },
-  "invoice.payment_succeeded": async (_: Stripe.Invoice) => {
-    // Add your business logic here
-  },
-  "invoice.payment_failed": async (data: Stripe.Invoice) => {
-    const customer = (await stripe.customers.retrieve(
-      data.customer as string,
-    )) as Stripe.Customer;
-    const db = getFirestore();
-    const userSnapshot = await db
-      .collection("users")
-      .doc(customer.metadata.firestoreUID!)
-      .get();
-    await userSnapshot.ref.update({ status: "PAST_DUE" });
   },
 };
 
