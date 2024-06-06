@@ -7,10 +7,9 @@
  * need to use are documented accordingly near the end.
  */
 import { TRPCError, initTRPC } from "@trpc/server";
-import { auth } from "firebase-admin";
-import { cookies } from "next/headers";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { isLogin } from "./utils/isLogin";
 
 /**
  * 1. CONTEXT
@@ -80,16 +79,6 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure;
-
-export const isLogin = async () => {
-  const session = cookies().get("session")?.value;
-  if (!session) return false;
-
-  const decodedClaims = await auth().verifySessionCookie(session, true);
-  if (!decodedClaims) return false;
-
-  return decodedClaims;
-};
 
 export const protectedProcedure = t.procedure.use(
   t.middleware(async ({ next }) => {

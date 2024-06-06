@@ -2,7 +2,6 @@ import { auth } from "firebase-admin";
 import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { initFirebaseAdminApp } from "~/lib/firebase-admin-config";
-import { isLogin } from "~/server/api/trpc";
 
 // Init the Firebase SDK every time the server is called
 initFirebaseAdminApp();
