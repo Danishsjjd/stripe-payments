@@ -3,6 +3,8 @@
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import type { PaymentMethod, SetupIntent } from "@stripe/stripe-js";
 import { useState, type FormEvent } from "react";
+import { toast } from "sonner";
+import StripeCards from "~/components/StripeCards";
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -30,12 +32,12 @@ const CustomersPage = () => {
         setSetupIntents(data as SetupIntent);
       },
     });
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!setupIntent?.client_secret) return;
 
+  const onAttachCardSubmit = async (e: FormEvent) => {
+    e.preventDefault();
     const cardElement = element?.getElement(CardElement);
-    if (!cardElement) return;
+
+    if (!setupIntent?.client_secret || !cardElement) return;
 
     setLoading(true);
     try {
@@ -45,18 +47,19 @@ const CustomersPage = () => {
       if (res) {
         const { error, setupIntent: setupIntentUpdated } = res;
         if (error) {
-          alert(error.message);
+          toast.error(error.message);
         } else {
           setSetupIntents(setupIntentUpdated);
           await wallets.refetch();
-          alert("success!!");
+          toast.success("success!!");
           cardElement.clear();
         }
       } else {
-        alert("something went wrong");
+        toast.info("something went wrong");
       }
     } finally {
       setLoading(false);
+      setSetupIntents(null);
     }
   };
 
@@ -82,18 +85,13 @@ const CustomersPage = () => {
       </div>
 
       {setupIntent && (
-        <form onSubmit={handleSubmit} className={classes.container}>
+        <form onSubmit={onAttachCardSubmit} className={classes.container}>
           <h3 className={classes.title}>Step 2: Submit a Payment Method</h3>
           <p className={classes.description}>
             Collect credit card details, then attach the payment source.
           </p>
-          <div className={classes.gridContainer}>
-            <p className={classes.gridLeftItem}>Normal Card:</p>{" "}
-            <code>4242424242424242</code>
-            <p className={classes.gridLeftItem}>3D Secure Card:</p>{" "}
-            <code>4000002500003155</code>
-          </div>
 
+          <StripeCards />
           <div className="flex items-center gap-4">
             <CardElement />
             <Button disabled={loading}>Attach</Button>

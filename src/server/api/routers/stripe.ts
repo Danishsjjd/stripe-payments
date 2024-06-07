@@ -5,6 +5,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { paymentForm } from "~/app/app/payment/paymentFormSchema";
 import { initFirebaseAdminApp } from "~/lib/firebase-admin-config";
 import { getFirestore } from "firebase-admin/firestore";
+import { firestore } from "firebase-admin";
 
 initFirebaseAdminApp();
 
@@ -113,18 +114,20 @@ async function cancelSubscription(userId: string, subscriptionId: string) {
 
   const subscription = await stripe.subscriptions.cancel(subscriptionId);
 
-  // ! (can be handled by webhook) Cancel at end of period
+  // to cancel at end of period:
   // const subscription = stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
-  // if (subscription.status === "canceled") {
-  //   const userSnapshot = getFirestore();
 
-  //   await userSnapshot
-  //     .collection("users")
-  //     .doc(userId)
-  //     .update({
-  //       activePlans: firestore.FieldValue.arrayRemove(subscription.id),
-  //     });
-  // }
+  // ! can be handled by webhook
+  if (subscription.status === "canceled") {
+    const userSnapshot = getFirestore();
+
+    await userSnapshot
+      .collection("users")
+      .doc(userId)
+      .update({
+        activePlans: firestore.FieldValue.arrayRemove(subscription.id),
+      });
+  }
 
   return subscription;
 }

@@ -11,6 +11,8 @@ import { Form, FormInput } from "~/components/ui/form";
 import { classes } from "~/data/classes";
 import { api } from "~/trpc/react";
 import { paymentForm } from "./paymentFormSchema";
+import StripeCards from "~/components/StripeCards";
+import { toast } from "sonner";
 
 type PaymentIntent = Stripe.Response<Stripe.PaymentIntent>;
 const PaymentPage = () => {
@@ -22,7 +24,6 @@ const PaymentPage = () => {
   const [paymentIntentResponse, setPaymentIntentResponse] = useState<
     PaymentIntent | undefined
   >();
-  const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof paymentForm>>({
     resolver: zodResolver(paymentForm),
@@ -31,7 +32,7 @@ const PaymentPage = () => {
     },
   });
 
-  const onPiSecret = async (data: z.infer<typeof paymentForm>) => {
+  const onPaymentIntentSecret = async (data: z.infer<typeof paymentForm>) => {
     if (!!paymentIntentResponse || paymentIntent.isPending) return;
 
     paymentIntent.mutate(data, {
@@ -41,7 +42,8 @@ const PaymentPage = () => {
     });
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const onPaySubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     const cardElement = elements?.getElement(CardElement);
@@ -59,12 +61,16 @@ const PaymentPage = () => {
       );
       if (!cardPayment || cardPayment.error) {
         console.error("error:", cardPayment?.error);
+        if (cardPayment?.error.message) {
+          toast.error(cardPayment?.error.message);
+        }
 
         cardPayment?.error.payment_intent &&
           setPaymentIntentResponse(
             cardPayment.error.payment_intent as PaymentIntent,
           );
       } else {
+        toast.success("Payment successful");
         console.info("success:", cardPayment.paymentIntent);
         setPaymentIntentResponse(cardPayment.paymentIntent as PaymentIntent);
       }
@@ -73,7 +79,7 @@ const PaymentPage = () => {
     }
   };
 
-  const amount = form.getValues("amount");
+  const amount = form.watch("amount");
   return (
     <>
       <h2 className={classes.pageTitle}>Payments</h2>
@@ -91,7 +97,7 @@ const PaymentPage = () => {
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onPiSecret)}
+            onSubmit={form.handleSubmit(onPaymentIntentSecret)}
             className="flex items-center gap-4"
           >
             <FormInput
@@ -100,16 +106,12 @@ const PaymentPage = () => {
               input={{
                 placeholder: "Amount",
                 type: "number",
-                disabled: !!paymentIntentResponse,
+                disabled: paymentIntent.isPending || !!paymentIntentResponse,
                 className: "grow",
               }}
             />
             <Button
-              disabled={
-                amount <= 0 ||
-                paymentIntent.isPending ||
-                !!paymentIntentResponse
-              }
+              disabled={paymentIntent.isPending || !!paymentIntentResponse}
             >
               Ready to Pay ${(amount / 100).toFixed(2)}
             </Button>
@@ -118,17 +120,12 @@ const PaymentPage = () => {
       </div>
 
       {paymentIntentResponse && (
-        <form onSubmit={handleSubmit} className={classes.container}>
+        <form onSubmit={onPaySubmit} className={classes.container}>
           <h3 className={classes.title}>Step 2: Submit a Payment Method</h3>
           <p className={classes.description}>
             Collect credit card details, then submit the payment.
           </p>
-          <div className={classes.gridContainer}>
-            <p className={classes.gridLeftItem}>Normal Card:</p>{" "}
-            <code>4242424242424242</code>
-            <p className={classes.gridLeftItem}>3D Secure Card:</p>{" "}
-            <code>4000002500003155</code>
-          </div>
+          <StripeCards />
 
           <div className="flex items-center gap-4">
             <CardElement />

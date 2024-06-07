@@ -29,6 +29,8 @@ export const env = createEnv({
     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string(),
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string(),
     NEXT_PUBLIC_FIREBASE_APP_ID: z.string(),
+    NEXT_PUBLIC_MONTHLY_PLAN_ID: z.string(),
+    NEXT_PUBLIC_QUARTERLY_PLAN_ID: z.string(),
   },
 
   /**
@@ -54,6 +56,8 @@ export const env = createEnv({
     FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY,
     FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL,
     FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
+    NEXT_PUBLIC_MONTHLY_PLAN_ID: process.env.NEXT_PUBLIC_MONTHLY_PLAN_ID,
+    NEXT_PUBLIC_QUARTERLY_PLAN_ID: process.env.NEXT_PUBLIC_QUARTERLY_PLAN_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

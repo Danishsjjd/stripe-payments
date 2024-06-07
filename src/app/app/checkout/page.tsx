@@ -20,14 +20,9 @@ const product = {
 } as const;
 
 const CheckoutPage = () => {
-  const router = useRouter();
   const stripe = useStripe();
 
   const [quantity, setQuantity] = useState(0);
-
-  const searchParams = useSearchParams();
-  const successParam = searchParams.get("success");
-  const sessionIdParam = searchParams.get("session_id");
 
   const checkout = api.stripe.checkout.useMutation();
 
@@ -58,23 +53,8 @@ const CheckoutPage = () => {
     );
   };
 
-  const [response, setResponse] = useState<{
-    success: undefined | string;
-    sessionId: undefined | string;
-  }>({ success: undefined, sessionId: undefined });
-
-  useEffect(() => {
-    if (successParam && sessionIdParam) {
-      setResponse({ success: successParam, sessionId: sessionIdParam });
-      router.replace(
-        window.location.href.split("?")[0] ?? window.location.href,
-      );
-    }
-  }, [router, successParam, sessionIdParam]);
-
   return (
     <>
-      <ShowToast success={response.success} />
       <h2 className={classes.pageTitle}>Stripe Checkout</h2>
       <p className={classes.pageDescription}>
         Change the quantity of the products below, then click checkout to open
@@ -126,11 +106,32 @@ const CheckoutPage = () => {
       >
         Start Checkout
       </Button>
+      <CheckoutResponse />
     </>
   );
 };
 
-const ShowToast = ({ success }: { success?: string }) => {
+const CheckoutResponse = () => {
+  const router = useRouter();
+
+  const searchParams = useSearchParams();
+  const successParam = searchParams.get("success");
+  const sessionIdParam = searchParams.get("session_id");
+
+  const [checkoutResponse, setCheckoutResponse] = useState<{
+    success: undefined | string;
+    sessionId: undefined | string;
+  }>({ success: undefined, sessionId: undefined });
+
+  useEffect(() => {
+    if (successParam && sessionIdParam) {
+      setCheckoutResponse({ success: successParam, sessionId: sessionIdParam });
+      router.replace(
+        window.location.href.split("?")[0] ?? window.location.href,
+      );
+    }
+  }, [router, successParam, sessionIdParam]);
+
   const showSuccess = useRef(true);
   useEffect(() => {
     if (!showSuccess.current) return;
@@ -138,11 +139,11 @@ const ShowToast = ({ success }: { success?: string }) => {
       true: () => toast.success("Checkout successful"),
       false: () => toast.error("Checkout not successful"),
     };
-    if (success) {
-      paramSwitch[success]?.();
+    if (checkoutResponse.success) {
+      paramSwitch[checkoutResponse.success]?.();
       showSuccess.current = false;
     }
-  }, [success]);
+  }, [checkoutResponse.success]);
 
   return null;
 };
