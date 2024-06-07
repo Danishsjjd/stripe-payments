@@ -3,6 +3,7 @@
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { type PaymentMethod } from "@stripe/stripe-js";
 import { collection, doc, onSnapshot } from "firebase/firestore";
+import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import type Stripe from "stripe";
@@ -127,7 +128,8 @@ const SubscriptionsPage = () => {
       </form>
 
       <div className={classes.container}>
-        <h3>Manage Current Subscriptions</h3>
+        <h3 className={classes.title}>Manage Current Subscriptions</h3>
+        <BillingPortalButton />
         <div>
           {subscriptions.data?.data?.map((sub) => (
             <div className={classes.gridContainer} key={sub.id}>
@@ -151,6 +153,29 @@ const SubscriptionsPage = () => {
         </div>
       </div>
     </>
+  );
+};
+
+const BillingPortalButton = () => {
+  const [return_url, setClient] = useState<false | string>(false);
+  const { data } = api.stripe.portalSession.useQuery(
+    {
+      return_url: return_url as string,
+    },
+    { enabled: typeof return_url === "string" },
+  );
+
+  useEffect(() => {
+    setClient(window.location.href);
+  }, []);
+
+  if (!data) return null;
+  if ("success" in data) return null;
+
+  return (
+    <Button asChild className="mt-5">
+      <Link href={data.url}>Manage billing</Link>
+    </Button>
   );
 };
 

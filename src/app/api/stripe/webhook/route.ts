@@ -11,6 +11,23 @@ initFirebaseAdminApp();
 const webhookHandler: Partial<
   Record<Stripe.Event.Type, (event: never) => Promise<unknown>>
 > = {
+  "customer.subscription.created": async (data: Stripe.Subscription) => {
+    const customer = (await stripe.customers.retrieve(
+      data.customer as string,
+    )) as Stripe.Customer;
+    const userId = customer.metadata.firestoreUID;
+    const db = getFirestore();
+    const userRef = db.collection("users").doc(userId!);
+
+    await userRef.update({
+      activePlans: firestore.FieldValue.arrayUnion(data.id),
+    });
+  },
+  "customer.subscription.updated": async (data: Stripe.Subscription) => {
+    // TODO: handle cancel subscription
+    // user.plan_expires = data.cancel_at
+    console.log(data);
+  },
   "customer.subscription.deleted": async (data: Stripe.Subscription) => {
     const customer = (await stripe.customers.retrieve(
       data.customer as string,
@@ -22,18 +39,6 @@ const webhookHandler: Partial<
 
     await userRef.update({
       activePlans: firestore.FieldValue.arrayRemove(data.id),
-    });
-  },
-  "customer.subscription.created": async (data: Stripe.Subscription) => {
-    const customer = (await stripe.customers.retrieve(
-      data.customer as string,
-    )) as Stripe.Customer;
-    const userId = customer.metadata.firestoreUID;
-    const db = getFirestore();
-    const userRef = db.collection("users").doc(userId!);
-
-    await userRef.update({
-      activePlans: firestore.FieldValue.arrayUnion(data.id),
     });
   },
 };

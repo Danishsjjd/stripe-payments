@@ -1,11 +1,11 @@
+import { firestore } from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 import type Stripe from "stripe";
 import { z } from "zod";
-import { stripe } from "~/lib/stripe";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { paymentForm } from "~/app/app/payment/paymentFormSchema";
 import { initFirebaseAdminApp } from "~/lib/firebase-admin-config";
-import { getFirestore } from "firebase-admin/firestore";
-import { firestore } from "firebase-admin";
+import { stripe } from "~/lib/stripe";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 initFirebaseAdminApp();
 
@@ -192,5 +192,28 @@ export const stripeRouter = createTRPCRouter({
     .input(z.object({ subscriptionId: z.string() }))
     .mutation(({ ctx, input }) =>
       cancelSubscription(ctx.user.uid, input.subscriptionId),
+    ),
+  portalSession: protectedProcedure
+    .input(z.object({ return_url: z.string() }))
+    .query(
+      async ({
+        ctx: {
+          user: { uid },
+        },
+        input: { return_url },
+      }) => {
+        const userSnapshot = await getFirestore()
+          .collection("users")
+          .doc(uid)
+          .get();
+        const user = userSnapshot.data();
+
+        if (!user?.stripeCustomerId) return { success: false };
+
+        return stripe.billingPortal.sessions.create({
+          customer: user.stripeCustomerId as string,
+          return_url,
+        });
+      },
     ),
 });
