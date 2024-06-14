@@ -11,8 +11,12 @@ export const isLogin = async () => {
   const session = cookies().get("session")?.value;
   if (!session) return false;
 
-  const decodedClaims = await auth().verifySessionCookie(session, true);
-  if (!decodedClaims) return false;
+  try {
+    const decodedClaims = await auth().verifySessionCookie(session, true);
+    if (!decodedClaims) return false;
 
-  return decodedClaims;
+    return decodedClaims;
+  } catch (e) {
+    return false;
+  }
 };
