@@ -1,8 +1,8 @@
 "use client";
 import {
   GoogleAuthProvider,
-  getRedirectResult,
-  signInWithRedirect,
+  onAuthStateChanged,
+  signInWithPopup,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -15,23 +15,22 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    void getRedirectResult(auth).then(async (userCred) => {
-      setLoading(false);
-      if (!userCred) {
-        return;
-      }
-      setLoading(true);
-      void fetch("/api/auth", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${await userCred.user.getIdToken()}`,
-        },
-      }).then((response) => {
-        if (response.status === 200) {
-          router.push("/app");
-        } else {
-          setLoading(false);
-        }
+    return onAuthStateChanged(auth, (userCred) => {
+      if (!userCred) return setLoading(false);
+
+      void userCred.getIdToken().then((token) => {
+        void fetch("/api/auth", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then((response) => {
+          if (response.status === 200) {
+            router.push("/app");
+          } else {
+            setLoading(false);
+          }
+        });
       });
     });
   }, [router]);
@@ -39,7 +38,7 @@ const LoginPage = () => {
   const handleGoogleAuth = () => {
     const provider = new GoogleAuthProvider();
 
-    void signInWithRedirect(auth, provider);
+    void signInWithPopup(auth, provider);
   };
 
   return (
